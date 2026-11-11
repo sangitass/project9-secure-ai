@@ -1,0 +1,40 @@
+name: Secure AI Application CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  security-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_pinned.txt
+          pip install bandit pip-audit
+
+      - name: Bandit Code Scan
+        run: bandit -r app.py injection_scanner.py
+
+      - name: Dependency Audit
+        run: pip-audit -r requirements_pinned.txt
+
+      - name: Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Custom Prompt Security Test
+        run: python injection_scanner.py
