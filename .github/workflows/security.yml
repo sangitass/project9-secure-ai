@@ -39,4 +39,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Custom Prompt Security Test
+        env:
+          JWT_SECRET: project9-test-secret
         run: python injection_scanner.py
